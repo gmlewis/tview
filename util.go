@@ -108,7 +108,14 @@ func printWithStyle(screen tcell.Screen, text string, x, y, skipWidth, maxWidth,
 			start += state.GrossLength()
 		}
 		if textWidth < maxWidth {
-			x, maxWidth = x+maxWidth/2-textWidth/2, textWidth
+			// Match urwid's left-heavy centering: when the slack
+			// (maxWidth - textWidth) is odd, the extra column goes
+			// to the LEFT (more padding on the left side). tview's
+			// original maxWidth/2 - textWidth/2 puts it on the right
+			// due to double-round-down. urwid uses ceil for the left
+			// margin, which (maxWidth - textWidth + 1) / 2 achieves
+			// via integer division rounding.
+			x, maxWidth = x+(maxWidth-textWidth+1)/2, textWidth
 		}
 	}
 
