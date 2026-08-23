@@ -524,6 +524,9 @@ func (b *Box) SetBlurFunc(callback func()) *Box {
 // Focus is called when this primitive directly receives focus.
 func (b *Box) Focus(delegate func(p Primitive)) {
 	b.hasFocus = true
+	if b.focus != nil {
+		b.focus()
+	}
 }
 
 // focused is called when this primitive or one of its descendents receives
@@ -536,6 +539,9 @@ func (b *Box) focused() {
 
 // Blur is called when this primitive directly loses focus.
 func (b *Box) Blur() {
+	if b.blur != nil {
+		b.blur()
+	}
 	b.hasFocus = false
 }
 

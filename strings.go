@@ -540,11 +540,11 @@ func parseTag(str string, state *stepState, opts stepOptions) (length int, style
 }
 
 // TaggedStringWidth returns the width of the given string needed to print it on
-// screen. The text may contain style tags which are not counted.
+// screen. The text may contain style and region tags which are not counted.
 func TaggedStringWidth(text string) (width int) {
 	var state *stepState
 	for len(text) > 0 {
-		_, text, state = step(text, state, stepOptionsStyle)
+		_, text, state = step(text, state, stepOptionsStyle|stepOptionsRegion)
 		width += state.Width()
 	}
 	return
@@ -569,7 +569,7 @@ func WordWrap(text string, width int) (lines []string) {
 	str := text
 	for len(str) > 0 {
 		// Parse the next character.
-		_, str, state = step(str, state, stepOptionsStyle)
+		_, str, state = step(str, state, stepOptionsStyle|stepOptionsRegion)
 		cWidth := state.Width()
 
 		// Would it exceed the line width?
@@ -631,8 +631,7 @@ func Unescape(text string) string {
 	return unescapePattern.ReplaceAllString(text, "$1]")
 }
 
-// stripTags strips style tags from the given string. (Region tags are not
-// stripped.)
+// stripTags strips style and region tags from the given string.
 func stripTags(text string) string {
 	var (
 		str   strings.Builder
@@ -640,7 +639,7 @@ func stripTags(text string) string {
 	)
 	for len(text) > 0 {
 		var c string
-		c, text, state = step(text, state, stepOptionsStyle)
+		c, text, state = step(text, state, stepOptionsStyle|stepOptionsRegion)
 		str.WriteString(c)
 	}
 	return str.String()

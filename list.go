@@ -537,6 +537,14 @@ func (l *List) Draw(screen tcell.Screen) {
 		bottomLimit = totalHeight
 	}
 
+	// Keep the current item in view. In v0.42.0 this clamp ran inline at
+	// the top of Draw; the fork extracted it into adjustOffset() but only
+	// called it from the keyboard handler. Restoring the call here ensures
+	// that SetCurrentItem (used by IndicativeListBox wheel scrolling and
+	// programmatic selection) followed by Draw scrolls the viewport to
+	// follow the cursor, matching v0.42.0 behavior.
+	l.adjustOffset()
+
 	// Make sure the list is not scrolled out of view.
 	if l.itemOffset >= len(l.items) {
 		l.itemOffset = len(l.items) - 1
