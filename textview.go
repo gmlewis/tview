@@ -864,6 +864,13 @@ func (t *TextView) Focus(delegate func(p Primitive)) {
 }
 
 // focusChain implements the [Primitive]'s focusChain method.
+// HasFocus returns whether or not this primitive has focus.
+func (t *TextView) HasFocus() bool {
+	t.Lock()
+	defer t.Unlock()
+	return t.Box.HasFocus()
+}
+
 func (t *TextView) focusChain(chain *[]Primitive) bool {
 	// Implemented here with locking because this may be used in the "changed"
 	// callback.

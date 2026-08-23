@@ -84,6 +84,14 @@ type Application struct {
 	// The root primitive to be seen on the screen.
 	root Primitive
 
+	// The primitive which currently has the keyboard focus. Set by SetFocus
+	// and returned by GetFocus as a fallback when the focus chain walk
+	// finds no primitive with hasFocus==true (which can happen when custom
+	// container Focus methods delegate to children without setting their
+	// own hasFocus flag). This preserves compatibility with callers that
+	// expect GetFocus to return the last SetFocus target.
+	focus Primitive
+
 	// Whether or not the application resizes the root primitive.
 	rootFullscreen bool
 
@@ -128,6 +136,15 @@ type Application struct {
 	mouseDownX, mouseDownY  int              // The position of the mouse when its button was last pressed.
 	lastMouseClick          time.Time        // The time when a mouse button was last clicked.
 	lastMouseButtons        tcell.ButtonMask // The last mouse button state.
+
+	// fullRedraw is set when the next draw() must call screen.Clear() before
+	// drawing primitives — i.e. after a resize, root replacement, or Sync.
+	// Normal redraws skip Clear() and rely on tcell's per-cell dirty checking
+	// to only repaint cells whose content actually changed. This eliminates
+	// the O(w×h) Fill loop that screen.Clear() performs on every frame, and
+	// combined with tcell's Put optimization, gives urwid-level incremental
+	// rendering: only changed cells are written to the terminal.
+	fullRedraw bool
 }
 
 // NewApplication creates and returns a new application.
@@ -376,6 +393,7 @@ func (a *Application) Run() error {
 			if a.title != "" {
 				screen.SetTitle(a.title)
 			}
+			a.fullRedraw = true
 			a.draw()
 		}
 	}()
@@ -488,7 +506,7 @@ EventLoop:
 					break
 				}
 				lastRedraw = time.Now()
-				screen.Clear()
+				a.fullRedraw = true
 				a.draw()
 			case *tcell.EventMouse:
 				consumed, isMouseDownAction := a.fireMouseActions(event)
@@ -721,8 +739,16 @@ func (a *Application) draw() *Application {
 		root.SetRect(0, 0, width, height)
 	}
 
-	// Clear screen to remove unwanted artifacts from the previous cycle.
-	screen.Clear()
+	// Clear screen only when a full redraw is requested (resize, root
+	// change, Sync). Normal redraws skip Clear() and rely on tcell's
+	// per-cell dirty checking — primitives' DrawForSubclass still fills
+	// their own rect, but cells whose content hasn't changed won't be
+	// repainted. This eliminates the O(w×h) Fill loop that Clear()
+	// performs on every frame.
+	if a.fullRedraw {
+		screen.Clear()
+		a.fullRedraw = false
+	}
 
 	// Call before handler if there is one.
 	if before != nil {
@@ -809,8 +835,9 @@ func (a *Application) SetRoot(root Primitive, fullscreen bool) *Application {
 	a.Lock()
 	a.root = root
 	a.rootFullscreen = fullscreen
+	a.focus = nil // Reset focus — SetFocus(root) below will set it.
 	if a.screen != nil {
-		a.screen.Clear()
+		a.fullRedraw = true
 	}
 	a.Unlock()
 
@@ -833,55 +860,30 @@ func (a *Application) ResizeToFullScreen(p Primitive) *Application {
 // down the hierarchy (starting at the root) until a primitive handles them,
 // which per default goes towards the focused primitive.
 //
-// Blur will be called on the previously focused [Primitive] and all of its
-// parents (including the root). Then Focus will be called on the new
-// [Primitive] and all of its parents (including the root).
+// Blur() will be called on the previously focused primitive. Focus() will be
+// called on the new primitive.
 func (a *Application) SetFocus(p Primitive) *Application {
-	a.RLock()
-	root := a.root
-	screen := a.screen
-	a.RUnlock()
-
-	// We make a focus chain with some pre-allocated space.
-	chain := make([]Primitive, 0, 10)
-
-	// Send blur events along the focus chain.
-	if root != nil && root.focusChain(&chain) {
-		for index, pr := range chain {
-			if index == 0 {
-				pr.Blur()
-			}
-			pr.blurred()
-		}
-
-		// Hide the cursor. If it's needed, the new focused primitive will show it
-		// again.
-		if screen != nil {
-			screen.HideCursor()
-		}
-	} // At this point, no primitive has focus.
-
-	// Focus the new primitive.
-	var delegated bool
-	if p != nil {
-		p.Focus(func(p Primitive) {
-			delegated = true // Avoids multiple focus notifications.
-			a.SetFocus(p)
-		})
-	}
-
-	// If the primitive delegated focus to a child, that call has already
-	// notified the focus listeners.
-	if delegated {
+	// Skip the blur+focus+HideCursor cycle when focus is already on p.
+	// This avoids redundant cursor hide/show escape sequences on every
+	// SetFocus call from tview's internal delegate closures (which fire
+	// on every key event), eliminating cursor flicker at the source.
+	if p != nil && p == a.focus {
 		return a
 	}
 
-	// Send focus events along the new focus chain.
-	chain = chain[:0]
-	if root != nil && root.focusChain(&chain) {
-		for _, pr := range chain {
-			pr.focused()
-		}
+	a.Lock()
+	if a.focus != nil {
+		a.focus.Blur()
+	}
+	a.focus = p
+	if a.screen != nil {
+		a.screen.HideCursor()
+	}
+	a.Unlock()
+	if p != nil {
+		p.Focus(func(p Primitive) {
+			a.SetFocus(p)
+		})
 	}
 
 	return a
@@ -892,14 +894,7 @@ func (a *Application) SetFocus(p Primitive) *Application {
 func (a *Application) GetFocus() Primitive {
 	a.RLock()
 	defer a.RUnlock()
-	if a.root == nil {
-		return nil
-	}
-	chain := make([]Primitive, 0, 10)
-	if a.root.focusChain(&chain) && len(chain) > 0 {
-		return chain[0]
-	}
-	return nil
+	return a.focus
 }
 
 // QueueUpdate is used to synchronize access to primitives from non-main

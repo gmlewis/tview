@@ -257,6 +257,16 @@ func (g *Grid) Focus(delegate func(p Primitive)) {
 }
 
 // focusChain implements the [Primitive]'s focusChain method.
+// HasFocus returns whether or not this primitive has focus.
+func (g *Grid) HasFocus() bool {
+	for _, item := range g.items {
+		if item.visible && item.Item.HasFocus() {
+			return true
+		}
+	}
+	return g.Box.HasFocus()
+}
+
 func (g *Grid) focusChain(chain *[]Primitive) bool {
 	for _, item := range g.items {
 		if !item.visible {

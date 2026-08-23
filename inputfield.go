@@ -455,10 +455,15 @@ func (i *InputField) AllowExit(event *tcell.EventKey) bool {
 
 // Focus is called when this primitive receives focus.
 func (i *InputField) Focus(delegate func(p Primitive)) {
-	delegate(i.textArea)
+	i.Box.Focus(delegate)
 }
 
 // focusChain implements the [Primitive]'s focusChain method.
+// HasFocus returns whether or not this primitive has focus.
+func (i *InputField) HasFocus() bool {
+	return i.textArea.HasFocus() || i.Box.HasFocus()
+}
+
 func (i *InputField) focusChain(chain *[]Primitive) bool {
 	if hasFocus := i.textArea.focusChain(chain); hasFocus {
 		if chain != nil {
@@ -471,6 +476,7 @@ func (i *InputField) focusChain(chain *[]Primitive) bool {
 
 // Blur is called when this primitive loses focus.
 func (i *InputField) Blur() {
+	i.textArea.Blur()
 	i.Box.Blur()
 	i.autocompleteList = nil // Hide the autocomplete drop-down.
 }

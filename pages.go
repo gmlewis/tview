@@ -267,6 +267,16 @@ func (p *Pages) GetPage(name string) Primitive {
 }
 
 // focusChain implements the [Primitive]'s focusChain method.
+// HasFocus returns whether or not this primitive has focus.
+func (p *Pages) HasFocus() bool {
+	for _, page := range p.pages {
+		if page.Item.HasFocus() {
+			return true
+		}
+	}
+	return p.Box.HasFocus()
+}
+
 func (p *Pages) focusChain(chain *[]Primitive) bool {
 	for _, page := range p.pages {
 		if hasFocus := page.Item.focusChain(chain); hasFocus {

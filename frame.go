@@ -177,6 +177,14 @@ func (f *Frame) Focus(delegate func(p Primitive)) {
 }
 
 // focusChain implements the [Primitive]'s focusChain method.
+// HasFocus returns whether or not this primitive has focus.
+func (f *Frame) HasFocus() bool {
+	if f.primitive == nil {
+		return f.Box.HasFocus()
+	}
+	return f.primitive.HasFocus()
+}
+
 func (f *Frame) focusChain(chain *[]Primitive) bool {
 	if f.primitive != nil {
 		if hasFocus := f.primitive.focusChain(chain); hasFocus {

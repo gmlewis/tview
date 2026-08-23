@@ -663,6 +663,14 @@ func (d *DropDown) Focus(delegate func(p Primitive)) {
 }
 
 // focusChain implements the [Primitive]'s focusChain method.
+// HasFocus returns whether or not this primitive has focus.
+func (d *DropDown) HasFocus() bool {
+	if d.open {
+		return d.list.HasFocus()
+	}
+	return d.Box.HasFocus()
+}
+
 func (d *DropDown) focusChain(chain *[]Primitive) bool {
 	if d.open {
 		if hasFocus := d.list.focusChain(chain); hasFocus {

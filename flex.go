@@ -215,6 +215,16 @@ func (f *Flex) Focus(delegate func(p Primitive)) {
 }
 
 // focusChain implements the [Primitive]'s focusChain method.
+// HasFocus returns whether or not this primitive has focus.
+func (f *Flex) HasFocus() bool {
+	for _, item := range f.items {
+		if item.Item != nil && item.Item.HasFocus() {
+			return true
+		}
+	}
+	return f.Box.HasFocus()
+}
+
 func (f *Flex) focusChain(chain *[]Primitive) bool {
 	for _, item := range f.items {
 		if item.Item == nil {

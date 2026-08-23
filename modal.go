@@ -149,6 +149,11 @@ func (m *Modal) Focus(delegate func(p Primitive)) {
 }
 
 // focusChain implements the [Primitive]'s focusChain method.
+// HasFocus returns whether or not this primitive has focus.
+func (m *Modal) HasFocus() bool {
+	return m.form.HasFocus()
+}
+
 func (m *Modal) focusChain(chain *[]Primitive) bool {
 	if hasFocus := m.form.focusChain(chain); hasFocus {
 		if chain != nil {

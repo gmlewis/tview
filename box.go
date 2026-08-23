@@ -548,7 +548,7 @@ func (b *Box) blurred() {
 
 // HasFocus returns whether or not this primitive has focus.
 func (b *Box) HasFocus() bool {
-	return b.Primitive.focusChain(nil)
+	return b.hasFocus
 }
 
 // focusChain implements the [Primitive]'s focusChain method.
