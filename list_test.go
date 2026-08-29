@@ -88,3 +88,60 @@ func TestListSelectedHighlightsSecondaryLine(t *testing.T) {
 		t.Error("GetShowSecondaryText() = false, want true")
 	}
 }
+
+// TestListItemEntryStyle pins per-entry styling: SetItemStyle assigns an
+// optional style to one list entry, drawn on BOTH the main and the secondary
+// line while the item is unselected — mirroring urwid's AttrMap(attr,
+// focus_attr), which styles the whole entry widget (nomadnet renders each
+// conversation entry as one Text whose name and time lines share the
+// list_normal / msg_notice_unread attr). The SELECTED item keeps selectedStyle
+// (urwid focus_attr semantics): its entry style, if any, must be ignored.
+func TestListItemEntryStyle(t *testing.T) {
+	sim := tcell.NewSimulationScreen("UTF-8")
+	if err := sim.Init(); err != nil {
+		t.Fatalf("sim.Init: %v", err)
+	}
+	t.Cleanup(sim.Fini)
+	sim.SetSize(30, 6)
+
+	entryFG := tcell.NewHexColor(0xbbaa44) // "list_warning"-style entry attr
+	selBG := tcell.NewRGBColor(170, 170, 170)
+
+	list := NewList()
+	list.ShowSecondaryText(true)
+	list.SetSelectedStyle(tcell.StyleDefault.Foreground(tcell.NewRGBColor(17, 17, 17)).Background(selBG)).
+		AddItem("sel entry", "  1d ago", 0, nil).
+		AddItem("other entry", "  2w ago", 0, nil)
+	list.SetCurrentItem(0)
+	list.SetItemStyle(0, tcell.StyleDefault.Foreground(entryFG)) // must be ignored (selected)
+	list.SetItemStyle(1, tcell.StyleDefault.Foreground(entryFG))
+	list.SetRect(0, 0, 30, 6)
+	list.Draw(sim)
+	sim.Sync()
+
+	cells, w, _ := sim.GetContents()
+	bgOf := func(s tcell.Style) tcell.Color { _, b, _ := s.Decompose(); return b }
+	fgOf := func(s tcell.Style) tcell.Color { f, _, _ := s.Decompose(); return f }
+	styleAt := func(x, y int) tcell.Style { return cells[y*w+x].Style }
+
+	// Selected entry (item 0): selectedStyle wins on both lines — entry style
+	// ignored, and the selected background covers the text cells.
+	if s := styleAt(4, 0); fgOf(s) != tcell.NewRGBColor(17, 17, 17) {
+		t.Errorf("selected main line fg = %v, want selected fg #111", fgOf(s))
+	}
+	if s := styleAt(4, 1); bgOf(s) != selBG {
+		t.Errorf("selected secondary line bg = %v, want selected bg", bgOf(s))
+	}
+
+	// Unselected entry (item 1): the entry style colors BOTH lines, with the
+	// default background untouched.
+	if s := styleAt(4, 2); fgOf(s) != entryFG {
+		t.Errorf("unselected main line fg = %v, want entry style fg", fgOf(s))
+	}
+	if s := styleAt(4, 3); fgOf(s) != entryFG {
+		t.Errorf("unselected secondary line fg = %v, want entry style fg", fgOf(s))
+	}
+	if s := styleAt(20, 3); bgOf(s) == selBG {
+		t.Errorf("unselected secondary line bg = %v, want no selected background", bgOf(s))
+	}
+}

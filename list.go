@@ -13,6 +13,14 @@ type listItem struct {
 	SecondaryText string // A secondary text to be shown underneath the main text.
 	Shortcut      rune   // The key to select the list item directly, 0 if there is no shortcut.
 	Selected      func() // The optional function which is called when the item is selected.
+	// entryStyle, when non-nil, styles BOTH lines of the item while it is NOT
+	// selected; the selected style replaces it. This mirrors urwid's
+	// AttrMap(attr, focus_attr), where one attribute styles the whole entry
+	// widget (nomadnet renders each conversation list entry as a single Text
+	// whose name and relative-time lines share the list_normal /
+	// msg_notice_unread attribute) and the focus attribute takes over on
+	// selection. See SetItemStyle.
+	entryStyle *tcell.Style
 }
 
 // List displays rows of items, each of which can be selected. List items can be
@@ -464,6 +472,19 @@ func (l *List) SetItemText(index int, main, secondary string) *List {
 	return l
 }
 
+// SetItemStyle sets the optional entry style of one item: the style drawn on
+// BOTH the main and the secondary line while the item is not selected. The
+// selected style replaces it while the item is selected (urwid AttrMap(attr,
+// focus_attr) semantics — one attribute for the whole entry, the focus
+// attribute taking over on selection). A nil-adjacent clearing call is
+// SetItemStyle(index, tcell.StyleDefault{}) — an entirely unset style renders
+// the lines with the list's global styles, as if no style had been set.
+// Panics if the index is out of range.
+func (l *List) SetItemStyle(index int, style tcell.Style) *List {
+	l.items[index].entryStyle = &style
+	return l
+}
+
 // FindItems searches the main and secondary texts for the given strings and
 // returns a list of item indices in which those strings are found. One of the
 // two search strings may be empty, it will then be ignored. Indices are always
@@ -606,6 +627,8 @@ func (l *List) Draw(screen tcell.Screen) {
 		style := l.mainTextStyle
 		if selected {
 			style = l.selectedStyle
+		} else if item.entryStyle != nil {
+			style = *item.entryStyle
 		}
 		mainText := item.MainText
 		if !l.mainStyleTags {
@@ -643,6 +666,8 @@ func (l *List) Draw(screen tcell.Screen) {
 			secondaryStyle := l.secondaryTextStyle
 			if selected {
 				secondaryStyle = l.selectedStyle
+			} else if item.entryStyle != nil {
+				secondaryStyle = *item.entryStyle
 			}
 			_, _, printedWidth := printWithStyle(screen, secondaryText, x, y, l.horizontalOffset, width, AlignLeft, secondaryStyle, false)
 			if printedWidth > maxWidth {
