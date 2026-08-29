@@ -318,6 +318,15 @@ func (l *List) ShowSecondaryText(show bool) *List {
 	return l
 }
 
+// GetShowSecondaryText reports whether secondary item texts are drawn (one
+// extra row per item). Drawers that need to convert between item indices and
+// physical rows — e.g. a hardware-cursor positioner wrapping a List — key off
+// this flag, since each item occupies exactly one row without secondary text
+// and two rows with it.
+func (l *List) GetShowSecondaryText() bool {
+	return l.showSecondaryText
+}
+
 // SetWrapAround sets the flag that determines whether navigating the list will
 // wrap around. That is, navigating downwards on the last item will move the
 // selection to the first item (similarly in the other direction). If set to
@@ -625,9 +634,24 @@ func (l *List) Draw(screen tcell.Screen) {
 			if !l.secondaryStyleTags {
 				secondaryText = Escape(secondaryText)
 			}
-			_, _, printedWidth := printWithStyle(screen, secondaryText, x, y, l.horizontalOffset, width, AlignLeft, l.secondaryTextStyle, false)
+			// A selected item's secondary row carries the same selected style
+			// as its main row: with two-line entries the selected entry reads
+			// as one highlighted block (urwid renders the entry as one widget
+			// whose focus style colors both lines), not a highlighted first
+			// line above a flat second line. Same foreground, background, and
+			// highlightFullLine fill as the main row.
+			secondaryStyle := l.secondaryTextStyle
+			if selected {
+				secondaryStyle = l.selectedStyle
+			}
+			_, _, printedWidth := printWithStyle(screen, secondaryText, x, y, l.horizontalOffset, width, AlignLeft, secondaryStyle, false)
 			if printedWidth > maxWidth {
 				maxWidth = printedWidth
+			}
+			if selected && l.highlightFullLine {
+				for bx := printedWidth; bx < width; bx++ {
+					screen.SetContent(x+bx, y, ' ', nil, secondaryStyle)
+				}
 			}
 			y++
 		}
