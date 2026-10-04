@@ -10,7 +10,7 @@ Please note that this document is work in progress so I might add to it in the f
 
 - Please include enough information so everybody understands your request.
 - Screenshots or code that illustrates your point always helps.
-- It's fine to ask for help. But you should have checked out the [documentation](https://godoc.org/github.com/rivo/tview) first in any case.
+- It's fine to ask for help. But you should have checked out the [documentation](https://godoc.org/github.com/gmlewis/tview) first in any case.
 - If you request a new feature, state your motivation and share a use case that you faced where you needed that new feature. It should be something that others will also need.
 
 ## Pull Requests
@@ -30,6 +30,6 @@ I'm very picky about the code that goes into this repo. So if you violate any of
 - Function/type/variable/constant names must be as descriptive as they are right now. Follow the conventions of the package.
 - All functions/types/variables/constants, even private ones, must have comments in good English. These comments must be elaborate enough so that new users of the package understand them and can follow them. Provide examples if you have to. Start all sentences upper-case, as is common in English, and end them with a period. Comments in their own lines must not exceed the 80 character border. Break over if necessary.
 - A new function should be located close to related functions in the file. For example, `GetColor()` should come after (or before) `SetColor()`.
-- Your changes must not decrease the project's [Go Report](https://goreportcard.com/report/github.com/rivo/tview) rating.
+- Your changes must not decrease the project's [Go Report](https://goreportcard.com/report/github.com/gmlewis/tview) rating.
 - No breaking changes unless there is absolutely no other way.
 - If an issue accompanies your pull request, reference it in the PR's comments, e.g. "Fixes #123", so it is closed automatically when the PR is closed.

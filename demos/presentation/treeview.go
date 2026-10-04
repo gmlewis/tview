@@ -4,12 +4,12 @@ import (
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/rivo/tview"
+	"github.com/gmlewis/tview"
 )
 
 const treeAllCode = `[green]package[white] main
 
-[green]import[white] [red]"github.com/rivo/tview"[white]
+[green]import[white] [red]"github.com/gmlewis/tview"[white]
 
 [green]func[white] [yellow]main[white]() {
 	$$$

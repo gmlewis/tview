@@ -12,7 +12,7 @@ import (
 //
 // Box provides a number of utility functions available to all primitives.
 //
-// See https://github.com/rivo/tview/wiki/Box for an example.
+// See https://github.com/gmlewis/tview/wiki/Box for an example.
 type Box struct {
 	// Points to the implementing primitive at the bottom of the hierarchy.
 	Primitive

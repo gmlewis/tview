@@ -460,7 +460,7 @@ func (t *tableDefaultContent) GetColumnCount() int {
 //
 // Use [Box.SetInputCapture] to override or modify keyboard input.
 //
-// See https://github.com/rivo/tview/wiki/Table for an example.
+// See https://github.com/gmlewis/tview/wiki/Table for an example.
 type Table struct {
 	*Box
 

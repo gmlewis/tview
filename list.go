@@ -47,7 +47,7 @@ type listItem struct {
 // since this is neither a change nor a selection, neither of the two functions
 // is called for the first item.
 //
-// See https://github.com/rivo/tview/wiki/List for an example.
+// See https://github.com/gmlewis/tview/wiki/List for an example.
 type List struct {
 	*Box
 

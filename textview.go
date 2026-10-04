@@ -149,7 +149,7 @@ func (w *batchWriter) focusChain(chain *[]Primitive) bool {
 // (using [TextView.SetScrollable]). This will cause the text view to discard
 // lines moving out of the visible area at the top.
 //
-// See https://github.com/rivo/tview/wiki/TextView for an example.
+// See https://github.com/gmlewis/tview/wiki/TextView for an example.
 type TextView struct {
 	sync.Mutex
 	*Box

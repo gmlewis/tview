@@ -1,7 +1,7 @@
 # Rich Interactive Widgets for Terminal UIs
 
-[![PkgGoDev](https://pkg.go.dev/badge/github.com/rivo/tview)](https://pkg.go.dev/github.com/rivo/tview)
-[![Go Report](https://img.shields.io/badge/go%20report-A%2B-brightgreen.svg)](https://goreportcard.com/report/github.com/rivo/tview)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/gmlewis/tview)](https://pkg.go.dev/github.com/gmlewis/tview)
+[![Go Report](https://img.shields.io/badge/go%20report-A%2B-brightgreen.svg)](https://goreportcard.com/report/github.com/gmlewis/tview)
 
 This Go package provides commonly used components for terminal based user interfaces.
 
@@ -27,7 +27,7 @@ They come with lots of customization options and can be easily extended to fit y
 To add this package to your project:
 
 ```bash
-go get github.com/rivo/tview@master
+go get github.com/gmlewis/tview@master
 ```
 
 ## Hello World
@@ -38,7 +38,7 @@ This basic example creates a box titled "Hello, World!" and displays it in your 
 package main
 
 import (
-	"github.com/rivo/tview"
+	"github.com/gmlewis/tview"
 )
 
 func main() {
@@ -49,7 +49,7 @@ func main() {
 }
 ```
 
-Check out the [GitHub Wiki](https://github.com/rivo/tview/wiki) for more examples along with screenshots. Or try the examples in the "demos" subdirectory.
+Check out the [GitHub Wiki](https://github.com/gmlewis/tview/wiki) for more examples along with screenshots. Or try the examples in the "demos" subdirectory.
 
 For a presentation highlighting this package, compile and run the program found in the "demos/presentation" subdirectory.
 
@@ -152,7 +152,7 @@ For a presentation highlighting this package, compile and run the program found 
 
 ## Documentation
 
-Refer to https://pkg.go.dev/github.com/rivo/tview for the package's documentation. Also check out the [Wiki](https://github.com/rivo/tview/wiki).
+Refer to https://pkg.go.dev/github.com/gmlewis/tview for the package's documentation. Also check out the [Wiki](https://github.com/gmlewis/tview/wiki).
 
 ## Dependencies
 
@@ -168,7 +168,7 @@ I try really hard to keep this project backwards compatible. Your software shoul
 
 - a new version of an imported package (most likely [`tcell`](https://github.com/gdamore/tcell)) changes in such a way that forces me to make changes in `tview` as well,
 - I fix something that I consider a bug, rather than a feature, something that does not work as originally intended,
-- I make changes to "internal" interfaces such as [`Primitive`](https://pkg.go.dev/github.com/rivo/tview#Primitive). You shouldn't need these interfaces unless you're writing your own primitives for `tview`. (Yes, I realize these are public interfaces. This has advantages as well as disadvantages. For the time being, it is what it is.)
+- I make changes to "internal" interfaces such as [`Primitive`](https://pkg.go.dev/github.com/gmlewis/tview#Primitive). You shouldn't need these interfaces unless you're writing your own primitives for `tview`. (Yes, I realize these are public interfaces. This has advantages as well as disadvantages. For the time being, it is what it is.)
 
 ## Your Feedback
 
