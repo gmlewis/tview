@@ -3,7 +3,7 @@ package tview
 import (
 	"testing"
 
-	"github.com/gdamore/tcell/v2"
+	"github.com/gmlewis/tcell/v2"
 )
 
 // TestListSelectedHighlightsSecondaryLine pins two-line item highlighting: with

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gdamore/tcell/v2"
+	"github.com/gmlewis/tcell/v2"
 	colorful "github.com/lucasb-eyer/go-colorful"
 )
 

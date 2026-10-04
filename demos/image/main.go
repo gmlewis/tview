@@ -8,7 +8,7 @@ import (
 	"image/jpeg"
 	"image/png"
 
-	"github.com/gdamore/tcell/v2"
+	"github.com/gmlewis/tcell/v2"
 	"github.com/gmlewis/tview"
 )
 
